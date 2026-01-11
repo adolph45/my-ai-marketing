@@ -14,7 +14,7 @@ const STORAGE_KEYS = {
 };
 
 const DEFAULT_FORM: MarketingInput = {
-  industry: '', // 保持為空
+  industry: '',
   brandName: '',
   style: '簡約風',
   audience: 'C端消費者',
@@ -34,7 +34,6 @@ const App: React.FC = () => {
   const [history, setHistory] = useState<MarketingPlan[]>([]);
   const [user, setUser] = useState<{ username: string } | null>(null);
   const [nicknameInput, setNicknameInput] = useState('');
-  
   const [formData, setFormData] = useState<MarketingInput>(DEFAULT_FORM);
 
   useEffect(() => {
@@ -43,17 +42,14 @@ const App: React.FC = () => {
     
     const savedUser = localStorage.getItem(STORAGE_KEYS.USER);
     if (savedUser) {
-      const parsedUser = JSON.parse(savedUser);
-      setUser(parsedUser);
+      setUser(JSON.parse(savedUser));
     }
 
     const savedForm = localStorage.getItem(STORAGE_KEYS.FORM);
     if (savedForm) {
       try {
         const parsedForm = JSON.parse(savedForm);
-        if (parsedForm) {
-          setFormData(parsedForm);
-        }
+        if (parsedForm) setFormData(parsedForm);
       } catch (e) {
         setFormData(DEFAULT_FORM);
       }
@@ -81,15 +77,30 @@ const App: React.FC = () => {
   const handleGeneratePlan = async (input: MarketingInput) => {
     setLoading(true);
     try {
+      // 如果環境變數中找不到 Key，且在特殊環境下，嘗試觸發選取對話框
+      // 但在標準 Vercel 部署中，我們主要依賴 process.env.API_KEY
+      if (!process.env.API_KEY && (window as any).aistudio) {
+        const hasKey = await (window as any).aistudio.hasSelectedApiKey();
+        if (!hasKey) {
+          await (window as any).aistudio.openSelectKey();
+        }
+      }
+
       const plan = await generateMarketingPlan(input);
       setCurrentPlan(plan);
       const newHistory = [plan, ...history].slice(0, 15);
       setHistory(newHistory);
       localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(newHistory));
       setActiveTab('dashboard');
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert("計畫生成失敗。請檢查您的 API Key 設定。");
+      // 顯示具體的錯誤原因，方便調試
+      alert(`計畫生成失敗：\n${error.message || "請檢查您的 API Key 是否正確設定於 Vercel 的 Environment Variables 中。"}`);
+      
+      // 如果是 404 錯誤，可能是型號不支援，提示用戶
+      if (error.message?.includes("Requested entity was not found")) {
+        alert("提示：所選的模型可能在您的區域不支援，系統已嘗試切換模型，請重試一次。");
+      }
     } finally {
       setLoading(false);
     }
@@ -133,107 +144,52 @@ const App: React.FC = () => {
               開始建立我的貼文
             </button>
           </form>
-          <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest pt-4 border-t border-black/5">The System IS READY.</p>
+          <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest pt-4 border-t border-black/5">SYSTEM READY</p>
         </div>
       </div>
     );
   }
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'dashboard':
-        return currentPlan ? (
-          <PlanDisplay plan={currentPlan} username={user.username} onUpdatePostStatus={updatePostStatus} />
-        ) : (
-          <div className="text-center py-40 dashboard-card space-y-8 bg-white/40">
-            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto text-slate-300 shadow-sm">
-              <AlertTriangle size={32} />
-            </div>
-            <div className="space-y-2">
-              <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">目前無載入的行銷計畫</p>
-              <button onClick={() => setActiveTab('generator')} className="text-emerald-600 text-sm font-bold hover:underline flex items-center justify-center mx-auto">
-                去生成一個計畫 <ChevronRight size={14} className="ml-1" />
-              </button>
-            </div>
-          </div>
-        );
-      case 'generator':
-        return (
-          <div className="space-y-12">
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3 text-emerald-500">
-                 <Rocket size={16} />
-                 <span className="text-[10px] font-bold tracking-widest uppercase text-left">Configuration</span>
-              </div>
-              <h2 className="text-2xl font-bold tracking-tight leading-tight text-left">設定我的貼文</h2>
-            </div>
-            <MarketingForm 
-              formData={formData} 
-              setFormData={setFormData} 
-              onSubmit={handleGeneratePlan} 
-              loading={loading} 
-            />
-          </div>
-        );
-      case 'calendar':
-        return (
-          <div className="space-y-12">
-            <h2 className="text-5xl font-bold tracking-tight text-left">執行時間軸</h2>
-            <div className="dashboard-card p-24 flex flex-col items-center justify-center text-slate-400 bg-white/40">
-              <CalendarIcon size={64} className="mb-6 opacity-20" />
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">排程管理模組開發中</p>
-            </div>
-          </div>
-        );
-      case 'history':
-        return (
-          <div className="space-y-12">
-            <div className="flex justify-between items-end">
-              <h2 className="text-5xl font-bold tracking-tight">存檔紀錄</h2>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Database History</p>
-            </div>
-            <div className="grid gap-6">
-              {history.length === 0 ? (
-                <div className="dashboard-card p-24 text-center text-slate-400 text-sm font-medium bg-white/40">
-                  目前尚未生成過任何方案
-                </div>
-              ) : (
-                history.map((p) => (
-                  <div 
-                    key={p.id} 
-                    className="dashboard-card p-8 flex items-center justify-between cursor-pointer hover:bg-white/80 transition-all border-none"
-                    onClick={() => { setCurrentPlan(p); setActiveTab('dashboard'); }}
-                  >
-                    <div className="flex items-center space-x-8">
-                      <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm">
-                        <TrendingUp size={24} className="text-emerald-500" />
-                      </div>
-                      <div className="text-left">
-                        <h4 className="text-lg font-bold leading-tight">{p.input.brandName || p.input.industry}</h4>
-                        <div className="flex items-center space-x-3 mt-1">
-                          <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">{new Date(p.timestamp).toLocaleDateString()}</span>
-                          <span className="status-dot"></span>
-                          <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500">{p.input.marketingGoal}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="w-10 h-10 bg-black/5 rounded-full flex items-center justify-center">
-                      <ChevronRight size={18} className="text-black/40" />
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
     <Layout activeTab={activeTab} setActiveTab={setActiveTab} user={user} onLogout={handleLogout}>
-      {renderContent()}
+      {activeTab === 'generator' && (
+        <div className="space-y-12">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3 text-emerald-500">
+               <Rocket size={16} />
+               <span className="text-[10px] font-bold tracking-widest uppercase text-left">Configuration</span>
+            </div>
+            <h2 className="text-2xl font-bold tracking-tight leading-tight text-left">設定我的貼文</h2>
+          </div>
+          <MarketingForm formData={formData} setFormData={setFormData} onSubmit={handleGeneratePlan} loading={loading} />
+        </div>
+      )}
+      {activeTab === 'dashboard' && (
+        currentPlan ? (
+          <PlanDisplay plan={currentPlan} username={user.username} onUpdatePostStatus={updatePostStatus} />
+        ) : (
+          <div className="text-center py-40 dashboard-card bg-white/40">
+            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">目前無載入的行銷計畫</p>
+            <button onClick={() => setActiveTab('generator')} className="mt-4 text-emerald-600 font-bold">去生成一個計畫 →</button>
+          </div>
+        )
+      )}
+      {activeTab === 'history' && (
+        <div className="space-y-12">
+          <h2 className="text-5xl font-bold tracking-tight text-left">存檔紀錄</h2>
+          <div className="grid gap-6">
+            {history.map((p) => (
+              <div key={p.id} className="dashboard-card p-8 flex items-center justify-between cursor-pointer hover:bg-white/80" onClick={() => { setCurrentPlan(p); setActiveTab('dashboard'); }}>
+                <div className="text-left">
+                  <h4 className="text-lg font-bold">{p.input.brandName || p.input.industry}</h4>
+                  <p className="text-xs text-slate-400">{new Date(p.timestamp).toLocaleDateString()}</p>
+                </div>
+                <ChevronRight size={18} className="text-slate-300" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </Layout>
   );
 };
