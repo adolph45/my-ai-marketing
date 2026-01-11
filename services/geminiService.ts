@@ -11,26 +11,38 @@ export const generateMarketingPlan = async (input: MarketingInput): Promise<Mark
 
   const ai = new GoogleGenAI({ apiKey: apiKey });
   
-  const systemInstruction = `你是一位世界級的行銷文案專家與社群經營者。
-你的任務是根據用戶輸入，生成 12 週的社群媒體計畫。
+  const systemInstruction = `你是一位世界級的行銷策略專家與文案大師。你的思考邏輯基於以下框架：
+1. JTBD (Jobs-to-be-Done) 任務理論：參考《創新的用途理論》(Competing Against Luck) 與鮑伯·莫斯塔 (Bob Moesta) 的「奶昔案例」，關注用戶想達成的「進展」而非產品本身。
+2. 成果驅動創新 (ODI)：參考安東尼·烏爾威克 (Anthony Ulwick) 的流程，專注於用戶期待的成果。
+3. 西奧多·李維特觀點：人們不是要買鑽頭，而是想要一個孔。
+4. 馬斯洛需求理論：分析受眾心理層次。
 
-內容規範：
-1. 每週必須包含 Facebook 與 Instagram 的貼文內容。
-2. Facebook 貼文內容：長度約為 300 字，語氣應包含專業見解、故事性或詳細說明。
-3. Instagram 貼文內容：長度約為 150 字，語氣應更感性、活潑、簡短，並強調視覺描述。
-4. 必須嚴格以 JSON 格式回傳。`;
+請根據用戶輸入，生成 12 週的社群計畫。
+
+內容產出規則：
+- 第一週為【準備週】：
+  * 人物誌洞察 (Persona)：基於 JTBD 框架，撰寫約 300 字的深度受眾解析（繁體中文）。
+  * 品牌定位策略：基於 ODI 與馬斯洛理論，撰寫約 300 字的品牌價值定位（繁體中文）。
+- 第二至十二週為【貼文週】：
+  * 每週包含 1 篇 Facebook 貼文（約 300 字）與 1 篇 Instagram 貼文（約 150 字）。
+  * 必須包含圖片生成描述 (Image Prompt)，描述需符合風格「${input.style}」。
+  * 每篇貼文最後必須包含聯絡資訊 CTA：${input.contactInfo}。
+  * 嚴禁在計畫中出現理論名稱（如 JTBD, ODI 等文字）。
+- 語氣需根據戰略目標「${input.marketingGoal}」調整。
+- 蒐集最近 3 年台灣相關行業的成功案例與法律訊息進行解析。`;
 
   const prompt = `
-產業：${input.industry}
+【輸入資料】
+產業類型：${input.industry}
 品牌名稱：${input.brandName}
 風格：${input.style}
 主要受眾：${input.audience}
-目標：${input.marketingGoal}
+戰略目標：${input.marketingGoal}
 核心重點：${input.strategyFocus}
+參考品牌/創作者：${input.targetBrandName} (${input.targetBrandUrl}), ${input.favoriteCreatorName} (${input.favoriteCreatorUrl})
 聯絡資訊：${input.contactInfo}
 
-請為我規劃 12 週的貼文，每週請提供 2-3 則貼文內容。
-`;
+請一次完成 12 週的計畫。第一週呈現人物誌與定位，第二週起呈現 FB/IG 貼文。`;
 
   try {
     const response = await ai.models.generateContent({
@@ -52,8 +64,8 @@ export const generateMarketingPlan = async (input: MarketingInput): Promise<Mark
                   prepPhase: {
                     type: Type.OBJECT,
                     properties: {
-                      persona: { type: Type.STRING },
-                      brandPositioning: { type: Type.STRING }
+                      persona: { type: Type.STRING, description: "約 300 字的人務誌分析" },
+                      brandPositioning: { type: Type.STRING, description: "約 300 字的定位策略" }
                     }
                   },
                   posts: {
@@ -61,21 +73,16 @@ export const generateMarketingPlan = async (input: MarketingInput): Promise<Mark
                     items: {
                       type: Type.OBJECT,
                       properties: {
-                        date: { type: Type.STRING },
-                        dayOfWeek: { type: Type.STRING },
                         platform: { type: Type.STRING, enum: ["FB", "IG"] },
                         content: { type: Type.STRING },
                         imagePrompt: { type: Type.STRING },
-                        hashtags: {
-                          type: Type.ARRAY,
-                          items: { type: Type.STRING }
-                        }
+                        hashtags: { type: Type.ARRAY, items: { type: Type.STRING } }
                       },
-                      required: ["date", "dayOfWeek", "platform", "content", "imagePrompt", "hashtags"]
+                      required: ["platform", "content", "imagePrompt", "hashtags"]
                     }
                   }
                 },
-                required: ["weekNumber", "startDate", "posts"]
+                required: ["weekNumber", "startDate"]
               }
             }
           },
@@ -84,12 +91,7 @@ export const generateMarketingPlan = async (input: MarketingInput): Promise<Mark
       }
     });
 
-    if (!response.text) {
-      throw new Error("AI 回傳了空的結果。");
-    }
-
     const rawData = JSON.parse(response.text);
-    
     return {
       id: Math.random().toString(36).substr(2, 9),
       timestamp: Date.now(),
@@ -100,39 +102,25 @@ export const generateMarketingPlan = async (input: MarketingInput): Promise<Mark
       }))
     };
   } catch (error: any) {
-    console.error("Gemini API Error:", error);
     throw new Error(error.message || "生成計畫時發生錯誤");
   }
 };
 
 export const generatePostImage = async (prompt: string): Promise<string> => {
   const apiKey = process.env.API_KEY;
-  if (!apiKey || apiKey === '' || apiKey === 'undefined') {
-    throw new Error("無法讀取 API_KEY，請確認環境變數設定。");
-  }
-
-  const ai = new GoogleGenAI({ apiKey: apiKey });
+  if (!apiKey) throw new Error("API_KEY 缺失");
+  const ai = new GoogleGenAI({ apiKey });
   
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
-      contents: {
-        parts: [{ text: `High-quality commercial photography for social media marketing, aesthetic, clean composition, ${prompt}` }],
-      }
+      contents: { parts: [{ text: prompt }] }
     });
-
-    if (!response.candidates || response.candidates.length === 0) {
-      throw new Error("模型未回傳任何候選結果。");
-    }
-
     for (const part of response.candidates[0].content.parts) {
-      if (part.inlineData) {
-        return `data:image/png;base64,${part.inlineData.data}`;
-      }
+      if (part.inlineData) return `data:image/png;base64,${part.inlineData.data}`;
     }
-    throw new Error("回傳結果中不包含圖片數據。");
+    throw new Error("圖片數據缺失");
   } catch (error: any) {
-    console.error("Image Generation Error:", error);
-    throw new Error(error.message || "圖片生成 API 發生未知錯誤");
+    throw error;
   }
 };
