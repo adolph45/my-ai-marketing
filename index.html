@@ -7,63 +7,57 @@
     <title>AI Marketing Strategist Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@400;700&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
       
       :root {
-        --bg-login: #FF8A8A;
-        --bg-dashboard: #F0F4F8;
-        --accent-coral: #FF8A8A;
-        --accent-emerald: #10b981;
-        --card-white: rgba(255, 255, 255, 0.9);
-        --text-dark: #1E293B;
+        --bg-main: #FDF8F1;
+        --accent-primary: #D69A73; /* Coffee Orange */
+        --accent-secondary: #F2E7D5; /* Warm Beige */
+        --text-main: #4A3728; /* Mocha Brown */
+        --card-bg: rgba(255, 255, 255, 0.85);
       }
 
       body {
         font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif;
-        background-color: var(--bg-dashboard);
-        color: var(--text-dark);
+        background-color: var(--bg-main);
+        color: var(--text-main);
         margin: 0;
         overflow-x: hidden;
       }
 
       .glass-card {
-        background: var(--card-white);
-        backdrop-filter: blur(12px);
+        background: var(--card-bg);
+        backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.6);
         border-radius: 40px;
-        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 25px 50px -12px rgba(74, 55, 40, 0.08);
       }
 
-      .btn-coral {
-        background-color: var(--accent-coral);
+      .btn-primary-coffee {
+        background-color: var(--accent-primary);
         color: white;
-        border-radius: 20px;
-        transition: all 0.3s ease;
+        border-radius: 24px;
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
       }
-      .btn-coral:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(255, 138, 138, 0.3);
-      }
-
-      .btn-emerald {
-        background-color: var(--accent-emerald);
-        color: white;
-        border-radius: 20px;
-        transition: all 0.3s ease;
+      .btn-primary-coffee:hover {
+        transform: translateY(-3px);
+        filter: brightness(1.05);
+        box-shadow: 0 12px 24px rgba(214, 154, 115, 0.25);
       }
 
       input, select, textarea {
-        background-color: #F8FAFC !important;
-        border: 1.5px solid #E2E8F0 !important;
-        border-radius: 20px !important;
-        padding: 14px 20px !important;
-        transition: all 0.2s ease !important;
+        background-color: rgba(255, 255, 255, 0.6) !important;
+        border: 1.5px solid var(--accent-secondary) !important;
+        border-radius: 24px !important;
+        padding: 16px 24px !important;
+        color: var(--text-main) !important;
+        transition: all 0.3s ease !important;
       }
       
       input:focus {
-        border-color: var(--accent-coral) !important;
+        border-color: var(--accent-primary) !important;
         background-color: #FFFFFF !important;
-        box-shadow: 0 0 0 4px rgba(255, 138, 138, 0.1) !important;
+        box-shadow: 0 0 0 5px rgba(214, 154, 115, 0.1) !important;
       }
 
       .wave-container {
