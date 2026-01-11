@@ -7,85 +7,79 @@
     <title>AI Marketing Strategist Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@400;700&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@400;700&display=swap');
       
       :root {
-        --bg-main: #F8F8FF;
-        --card-bg: #D3D3D3;
-        --accent-green: #10b981;
-        --text-main: #1a1a1a;
-        --text-muted: #6b7280;
+        --bg-login: #FF8A8A;
+        --bg-dashboard: #F0F4F8;
+        --accent-coral: #FF8A8A;
+        --accent-emerald: #10b981;
+        --card-white: rgba(255, 255, 255, 0.9);
+        --text-dark: #1E293B;
       }
 
       body {
-        font-family: 'Inter', 'Noto Sans TC', sans-serif;
-        background-color: var(--bg-main);
-        color: var(--text-main);
+        font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif;
+        background-color: var(--bg-dashboard);
+        color: var(--text-dark);
         margin: 0;
         overflow-x: hidden;
       }
 
-      * {
-        font-style: normal !important;
+      .glass-card {
+        background: var(--card-white);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        border-radius: 40px;
+        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05);
       }
 
-      .dashboard-card {
-        background: var(--card-bg);
-        border-radius: 32px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.4);
-      }
-
-      .btn-primary {
-        background-color: var(--accent-green);
+      .btn-coral {
+        background-color: var(--accent-coral);
         color: white;
-        border-radius: 12px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        border-radius: 20px;
+        transition: all 0.3s ease;
       }
-      .btn-primary:hover {
-        opacity: 0.95;
+      .btn-coral:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        box-shadow: 0 10px 20px rgba(255, 138, 138, 0.3);
+      }
+
+      .btn-emerald {
+        background-color: var(--accent-emerald);
+        color: white;
+        border-radius: 20px;
+        transition: all 0.3s ease;
       }
 
       input, select, textarea {
-        background-color: rgba(255, 255, 255, 0.7) !important;
-        backdrop-filter: blur(10px);
-        border-radius: 16px !important;
-        border: 1px solid rgba(255, 255, 255, 0.5) !important;
+        background-color: #F8FAFC !important;
+        border: 1.5px solid #E2E8F0 !important;
+        border-radius: 20px !important;
+        padding: 14px 20px !important;
         transition: all 0.2s ease !important;
       }
       
-      input:focus, select:focus, textarea:focus {
-        background-color: rgba(255, 255, 255, 0.9) !important;
-        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1) !important;
+      input:focus {
+        border-color: var(--accent-coral) !important;
+        background-color: #FFFFFF !important;
+        box-shadow: 0 0 0 4px rgba(255, 138, 138, 0.1) !important;
       }
 
-      .status-dot {
-        width: 8px;
-        height: 8px;
-        background-color: var(--accent-green);
-        border-radius: 50%;
-        display: inline-block;
-        box-shadow: 0 0 8px var(--accent-green);
-      }
-
-      .post-content-text {
-        font-family: 'Noto Serif TC', serif;
-        font-size: 1.1rem;
-        line-height: 1.7;
+      .wave-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        line-height: 0;
+        z-index: 0;
       }
 
       @media print {
         aside, .no-print, button { display: none !important; }
         main { margin-left: 0 !important; width: 100% !important; padding: 0 !important; }
         body { background: white !important; }
-        .dashboard-card { box-shadow: none !important; border: 1px solid #eee !important; background: white !important; }
-      }
-      
-      .page-break {
-        page-break-after: always;
+        .glass-card { box-shadow: none !important; border: 1px solid #eee !important; background: white !important; }
       }
     </style>
   <script type="importmap">
