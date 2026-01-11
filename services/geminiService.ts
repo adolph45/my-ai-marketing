@@ -11,27 +11,33 @@ const getNextMonday = (): string => {
 };
 
 export const generateMarketingPlan = async (input: MarketingInput): Promise<MarketingPlan> => {
-  // 檢查 API Key 是否存在於環境變數中
-  // 在 Vite/Vercel 環境中，process.env.API_KEY 必須在編譯時注入
   const apiKey = process.env.API_KEY;
 
   if (!apiKey || apiKey === '' || apiKey === 'undefined') {
-    console.error("DEBUG: API_KEY is missing in process.env");
     throw new Error("環境變數中找不到 API_KEY。請檢查 Vercel 專案設定中的 Environment Variables 是否已添加名為 'API_KEY' 的項目，並確保該變數已生效。");
   }
 
   const ai = new GoogleGenAI({ apiKey: apiKey });
-  const startDate = getNextMonday();
   
-  const systemInstruction = `你是一位世界級的行銷策略專家。
-你的任務是根據用戶輸入的資訊，生成一份為期 12 週的社群媒體行銷計畫。
-必須嚴格以 JSON 格式回傳。`;
+  const systemInstruction = `你是一位世界級的行銷文案專家與社群經營者。
+你的任務是根據用戶輸入，生成 12 週的社群媒體計畫。
 
-  const prompt = `產業：${input.industry}
-品牌：${input.brandName}
+內容規範：
+1. 每週必須包含 Facebook 與 Instagram 的貼文內容。
+2. Facebook 貼文內容：長度約為 300 字，語氣應包含專業見解、故事性或詳細說明。
+3. Instagram 貼文內容：長度約為 150 字，語氣應更感性、活潑、簡短，並強調視覺描述。
+4. 必須嚴格以 JSON 格式回傳。`;
+
+  const prompt = `
+產業：${input.industry}
+品牌名稱：${input.brandName}
+風格：${input.style}
+主要受眾：${input.audience}
 目標：${input.marketingGoal}
-客群：${input.audience}
+核心重點：${input.strategyFocus}
 聯絡資訊：${input.contactInfo}
+
+請為我規劃 12 週的貼文，每週請提供 2-3 則貼文內容。
 `;
 
   try {
@@ -65,7 +71,7 @@ export const generateMarketingPlan = async (input: MarketingInput): Promise<Mark
                       properties: {
                         date: { type: Type.STRING },
                         dayOfWeek: { type: Type.STRING },
-                        platform: { type: Type.STRING },
+                        platform: { type: Type.STRING, enum: ["FB", "IG"] },
                         content: { type: Type.STRING },
                         imagePrompt: { type: Type.STRING },
                         hashtags: {
@@ -77,7 +83,7 @@ export const generateMarketingPlan = async (input: MarketingInput): Promise<Mark
                     }
                   }
                 },
-                required: ["weekNumber", "startDate"]
+                required: ["weekNumber", "startDate", "posts"]
               }
             }
           },
@@ -102,12 +108,8 @@ export const generateMarketingPlan = async (input: MarketingInput): Promise<Mark
       }))
     };
   } catch (error: any) {
-    console.error("Gemini API Error Detail:", error);
-    // 拋出更具體的錯誤
-    if (error.message?.includes("API_KEY_INVALID")) {
-      throw new Error("API Key 無效，請檢查 Key 是否正確複製。");
-    }
-    throw new Error(error.message || "生成計畫時發生未知錯誤");
+    console.error("Gemini API Error:", error);
+    throw new Error(error.message || "生成計畫時發生錯誤");
   }
 };
 
@@ -119,7 +121,7 @@ export const generatePostImage = async (prompt: string): Promise<string> => {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: {
-        parts: [{ text: `High-quality commercial photography, ${prompt}` }],
+        parts: [{ text: `High-quality commercial photography for marketing, ${prompt}` }],
       }
     });
 
