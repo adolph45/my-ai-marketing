@@ -12,6 +12,7 @@
       :root {
         --bg-main: #FDF8F1;
         --accent-primary: #D69A73; /* Coffee Orange */
+        --accent-cream-brown: #A67C52; /* 奶油棕 */
         --accent-secondary: #F2E7D5; /* Warm Beige */
         --text-main: #4A3728; /* Mocha Brown */
         --card-bg: rgba(255, 255, 255, 0.85);
@@ -34,24 +35,25 @@
       }
 
       .btn-primary-coffee {
-        background-color: var(--accent-primary);
+        background-color: var(--accent-cream-brown);
         color: white;
         border-radius: 24px;
         transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
       }
       .btn-primary-coffee:hover {
         transform: translateY(-3px);
-        filter: brightness(1.05);
-        box-shadow: 0 12px 24px rgba(214, 154, 115, 0.25);
+        filter: brightness(1.1);
+        box-shadow: 0 12px 24px rgba(166, 124, 82, 0.25);
       }
 
       input, select, textarea {
         background-color: rgba(255, 255, 255, 0.6) !important;
         border: 1.5px solid var(--accent-secondary) !important;
-        border-radius: 24px !important;
-        padding: 16px 24px !important;
+        border-radius: 12px !important; /* 稍微縮小圓角以搭配較小 padding */
+        padding: 3px 12px !important; /* 依照要求設定 3px padding */
         color: var(--text-main) !important;
         transition: all 0.3s ease !important;
+        width: 100% !important; /* 盡量拉長 */
       }
       
       input:focus {
