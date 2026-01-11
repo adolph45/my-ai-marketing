@@ -2,19 +2,11 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { MarketingInput, MarketingPlan } from "../types";
 
-const getNextMonday = (): string => {
-  const d = new Date();
-  const day = d.getDay();
-  const diff = (1 + 7 - day) % 7 || 7;
-  d.setDate(d.getDate() + diff);
-  return d.toISOString().split('T')[0];
-};
-
 export const generateMarketingPlan = async (input: MarketingInput): Promise<MarketingPlan> => {
   const apiKey = process.env.API_KEY;
 
   if (!apiKey || apiKey === '' || apiKey === 'undefined') {
-    throw new Error("環境變數中找不到 API_KEY。請檢查 Vercel 專案設定中的 Environment Variables 是否已添加名為 'API_KEY' 的項目，並確保該變數已生效。");
+    throw new Error("環境變數中找不到 API_KEY。請檢查 Vercel 專案設定中的 Environment Variables 是否已添加名為 'API_KEY' 的項目。");
   }
 
   const ai = new GoogleGenAI({ apiKey: apiKey });
@@ -114,24 +106,33 @@ export const generateMarketingPlan = async (input: MarketingInput): Promise<Mark
 };
 
 export const generatePostImage = async (prompt: string): Promise<string> => {
-  const apiKey = process.env.API_KEY || '';
+  const apiKey = process.env.API_KEY;
+  if (!apiKey || apiKey === '' || apiKey === 'undefined') {
+    throw new Error("無法讀取 API_KEY，請確認環境變數設定。");
+  }
+
   const ai = new GoogleGenAI({ apiKey: apiKey });
   
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: {
-        parts: [{ text: `High-quality commercial photography for marketing, ${prompt}` }],
+        parts: [{ text: `High-quality commercial photography for social media marketing, aesthetic, clean composition, ${prompt}` }],
       }
     });
+
+    if (!response.candidates || response.candidates.length === 0) {
+      throw new Error("模型未回傳任何候選結果。");
+    }
 
     for (const part of response.candidates[0].content.parts) {
       if (part.inlineData) {
         return `data:image/png;base64,${part.inlineData.data}`;
       }
     }
-    throw new Error("無法獲取圖片。");
+    throw new Error("回傳結果中不包含圖片數據。");
   } catch (error: any) {
-    throw error;
+    console.error("Image Generation Error:", error);
+    throw new Error(error.message || "圖片生成 API 發生未知錯誤");
   }
 };
