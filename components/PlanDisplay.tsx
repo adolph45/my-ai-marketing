@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { MarketingPlan, SocialPost } from '../types';
-import { Download, CheckCircle, Clock, ArrowUpRight, Loader2, Sparkles, Send } from 'lucide-react';
+import { Download, CheckCircle, Clock, ArrowUpRight, Loader2, Sparkles, Send, Key } from 'lucide-react';
 import { generatePostImage } from '../services/geminiService';
 
 interface Props {
@@ -20,7 +20,14 @@ const PostCard: React.FC<{ post: SocialPost, onComplete: () => void }> = ({ post
       const url = await generatePostImage(post.imagePrompt);
       setImageUrl(url);
     } catch (err: any) {
-      alert(`生成失敗：${err.message}`);
+      console.error(err);
+      if (err.message.includes("配額限制")) {
+        if (confirm("圖片生成需要付費專案金鑰，是否開啟選取對話框？")) {
+          (window as any).aistudio?.openSelectKey();
+        }
+      } else {
+        alert(`生成失敗：${err.message}`);
+      }
     } finally {
       setIsGenerating(false);
     }
@@ -49,16 +56,24 @@ const PostCard: React.FC<{ post: SocialPost, onComplete: () => void }> = ({ post
       </div>
       <div className="bg-black/5 p-8 border-t border-black/5">
         <div className="flex items-center justify-between mb-4">
-           <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">視覺指令生成</span>
+           <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">視覺指令推薦</span>
            {!imageUrl && (
-             <button onClick={handleGenerateImage} disabled={isGenerating} className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-[10px] font-bold">
-               {isGenerating ? <Loader2 size={12} className="animate-spin" /> : '生成圖片'}
+             <button onClick={handleGenerateImage} disabled={isGenerating} className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-[10px] font-bold flex items-center space-x-2">
+               {isGenerating ? <Loader2 size={12} className="animate-spin" /> : <Send size={12} />}
+               <span>{isGenerating ? '繪製中...' : '生成圖片'}</span>
              </button>
            )}
         </div>
-        {imageUrl ? <img src={imageUrl} className="rounded-2xl w-full aspect-square object-cover shadow-sm" /> : 
+        {imageUrl ? (
+          <div className="relative group rounded-2xl overflow-hidden shadow-sm aspect-square bg-white">
+            <img src={imageUrl} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center no-print">
+               <button onClick={handleGenerateImage} className="px-5 py-2.5 bg-white rounded-full text-[10px] font-black text-black shadow-xl">重新生成</button>
+            </div>
+          </div>
+        ) : (
           <p className="text-[11px] text-slate-600 italic text-left opacity-70">「{post.imagePrompt}」</p>
-        }
+        )}
       </div>
     </div>
   );
@@ -77,14 +92,20 @@ const PlanDisplay: React.FC<Props> = ({ plan, username, onUpdatePostStatus }) =>
           </div>
           <div className="space-y-2">
             <h2 className="text-3xl font-black text-slate-900 leading-none">{username} 的</h2>
-            <h3 className="text-xl font-bold text-slate-600">貼文計畫</h3>
+            <h3 className="text-xl font-bold text-slate-600 uppercase tracking-tight">貼文計畫</h3>
           </div>
-          <div className="flex items-center gap-6 text-[11px] font-bold text-slate-500 uppercase tracking-widest">
+          <div className="flex flex-wrap items-center gap-6 text-[11px] font-bold text-slate-500 uppercase tracking-widest">
             <div className="flex items-center gap-2"><div className="status-dot"></div><span>{plan.input.brandName || plan.input.industry}</span></div>
-            <div className="flex items-center gap-2"><ArrowUpRight size={14} /><span>12 週計畫</span></div>
+            <div className="flex items-center gap-2"><ArrowUpRight size={14} /><span>12 週計畫啟動</span></div>
           </div>
         </div>
-        <button onClick={handlePrint} className="no-print bg-emerald-600 text-white rounded-2xl px-10 py-5 text-[12px] font-black tracking-widest shadow-xl uppercase transition-all active:scale-95">匯出計畫</button>
+        <div className="flex flex-col gap-4 no-print">
+          <button onClick={handlePrint} className="bg-emerald-600 text-white rounded-2xl px-12 py-5 text-[12px] font-black tracking-widest shadow-xl uppercase transition-all active:scale-95">匯出貼文計畫</button>
+          <button onClick={() => (window as any).aistudio?.openSelectKey()} className="flex items-center justify-center space-x-2 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-emerald-600">
+            <Key size={14} />
+            <span>更新 API 金鑰</span>
+          </button>
+        </div>
       </div>
 
       <div className="space-y-24">
@@ -99,13 +120,16 @@ const PlanDisplay: React.FC<Props> = ({ plan, username, onUpdatePostStatus }) =>
             </div>
 
             {week.prepPhase ? (
-              <div className="grid grid-cols-1 gap-10">
-                <div className="bg-[#D3D3D3] rounded-[32px] p-10 text-left border border-white/20 shadow-sm">
-                  <h4 className="text-[10px] font-black tracking-[0.3em] uppercase text-slate-500 mb-6">深度人物誌洞察 (Persona Insight)</h4>
+              <div className="grid grid-cols-1 gap-12">
+                <div className="bg-[#D3D3D3] rounded-[32px] p-10 text-left border border-white/20 shadow-sm relative group overflow-hidden">
+                  <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
+                    <Sparkles size={60} />
+                  </div>
+                  <h4 className="text-[10px] font-black tracking-[0.3em] uppercase text-slate-500 mb-8 border-b border-black/5 pb-4">深度人物誌洞察 (Persona Insight)</h4>
                   <div className="text-lg leading-relaxed text-slate-800 font-medium whitespace-pre-wrap">{week.prepPhase.persona}</div>
                 </div>
                 <div className="bg-[#D3D3D3] rounded-[32px] p-10 text-left border border-white/20 shadow-sm">
-                  <h4 className="text-[10px] font-black tracking-[0.3em] uppercase text-slate-500 mb-6">品牌定位策略 (Brand Positioning)</h4>
+                  <h4 className="text-[10px] font-black tracking-[0.3em] uppercase text-slate-500 mb-8 border-b border-black/5 pb-4">品牌定位策略 (Brand Positioning)</h4>
                   <div className="text-lg leading-relaxed text-slate-800 font-medium whitespace-pre-wrap">{week.prepPhase.brandPositioning}</div>
                 </div>
               </div>
