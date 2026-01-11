@@ -6,43 +6,40 @@ export const generateMarketingPlan = async (input: MarketingInput): Promise<Mark
   const apiKey = process.env.API_KEY;
 
   if (!apiKey || apiKey === '' || apiKey === 'undefined') {
-    throw new Error("環境變數中找不到 API_KEY。請檢查 Vercel 專案設定中的 Environment Variables 是否已添加名為 'API_KEY' 的項目。");
+    throw new Error("API_KEY 缺失，請確保已在環境變數或透過金鑰選取對話框設定金鑰。");
   }
 
   const ai = new GoogleGenAI({ apiKey: apiKey });
   
-  const systemInstruction = `你是一位世界級的行銷策略專家與文案大師。你的思考邏輯基於以下框架：
-1. JTBD (Jobs-to-be-Done) 任務理論：參考《創新的用途理論》(Competing Against Luck) 與鮑伯·莫斯塔 (Bob Moesta) 的「奶昔案例」，關注用戶想達成的「進展」而非產品本身。
-2. 成果驅動創新 (ODI)：參考安東尼·烏爾威克 (Anthony Ulwick) 的流程，專注於用戶期待的成果。
-3. 西奧多·李維特觀點：人們不是要買鑽頭，而是想要一個孔。
-4. 馬斯洛需求理論：分析受眾心理層次。
+  const systemInstruction = `你是一位世界級的行銷策略專家與文案大師。
+【核心邏輯框架】
+1. JTBD 任務理論：專注於用戶想達成的「進展」。
+2. ODI 成果驅動創新：專注於用戶期待的成果。
+3. 西奧多·李維特觀點：人們想要的是「孔」而非「鑽頭」。
+4. 馬斯洛需求理論：對應心理需求層次。
 
-請根據用戶輸入，生成 12 週的社群計畫。
-
-內容產出規則：
-- 第一週為【準備週】：
-  * 人物誌洞察 (Persona)：基於 JTBD 框架，撰寫約 300 字的深度受眾解析（繁體中文）。
-  * 品牌定位策略：基於 ODI 與馬斯洛理論，撰寫約 300 字的品牌價值定位（繁體中文）。
-- 第二至十二週為【貼文週】：
-  * 每週包含 1 篇 Facebook 貼文（約 300 字）與 1 篇 Instagram 貼文（約 150 字）。
-  * 必須包含圖片生成描述 (Image Prompt)，描述需符合風格「${input.style}」。
-  * 每篇貼文最後必須包含聯絡資訊 CTA：${input.contactInfo}。
-  * 嚴禁在計畫中出現理論名稱（如 JTBD, ODI 等文字）。
-- 語氣需根據戰略目標「${input.marketingGoal}」調整。
-- 蒐集最近 3 年台灣相關行業的成功案例與法律訊息進行解析。`;
+【內容產出規則】
+- 第一週【準備週】：
+  * 人物誌洞察 (Persona)：請根據 JTBD 框架撰寫至少 300 字的深度分析。
+  * 品牌定位策略：請根據 ODI 與馬斯洛理論撰寫至少 300 字的策略。
+  * 全部內容必須使用「繁體中文」撰寫。
+  * 內容中嚴禁出現「JTBD」、「ODI」、「馬斯洛」、「鑽頭理論」等學術專有名詞。
+- 第二至十二週【貼文週】：
+  * 每週 1 篇 Facebook (300字) 與 1 篇 Instagram (150字)。
+  * 風格必須符合：${input.style}。
+  * 每篇貼文末尾必須包含聯絡資訊 CTA：\n${input.contactInfo}。
+- 根據最近 3 年台灣行銷案例與法令進行規劃。`;
 
   const prompt = `
-【輸入資料】
-產業類型：${input.industry}
-品牌名稱：${input.brandName}
-風格：${input.style}
-主要受眾：${input.audience}
-戰略目標：${input.marketingGoal}
-核心重點：${input.strategyFocus}
-參考品牌/創作者：${input.targetBrandName} (${input.targetBrandUrl}), ${input.favoriteCreatorName} (${input.favoriteCreatorUrl})
-聯絡資訊：${input.contactInfo}
+【行銷參數】
+產業：${input.industry}
+受眾：${input.audience}
+目標：${input.marketingGoal}
+重點：${input.strategyFocus}
+參考品牌：${input.targetBrandName} (${input.targetBrandUrl})
+參考帳號：${input.favoriteCreatorName} (${input.favoriteCreatorUrl})
 
-請一次完成 12 週的計畫。第一週呈現人物誌與定位，第二週起呈現 FB/IG 貼文。`;
+請直接生成完整的 12 週 JSON 計畫。`;
 
   try {
     const response = await ai.models.generateContent({
@@ -64,8 +61,8 @@ export const generateMarketingPlan = async (input: MarketingInput): Promise<Mark
                   prepPhase: {
                     type: Type.OBJECT,
                     properties: {
-                      persona: { type: Type.STRING, description: "約 300 字的人務誌分析" },
-                      brandPositioning: { type: Type.STRING, description: "約 300 字的定位策略" }
+                      persona: { type: Type.STRING },
+                      brandPositioning: { type: Type.STRING }
                     }
                   },
                   posts: {
@@ -102,25 +99,41 @@ export const generateMarketingPlan = async (input: MarketingInput): Promise<Mark
       }))
     };
   } catch (error: any) {
-    throw new Error(error.message || "生成計畫時發生錯誤");
+    throw error;
   }
 };
 
 export const generatePostImage = async (prompt: string): Promise<string> => {
   const apiKey = process.env.API_KEY;
-  if (!apiKey) throw new Error("API_KEY 缺失");
-  const ai = new GoogleGenAI({ apiKey });
+  const ai = new GoogleGenAI({ apiKey: apiKey });
   
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
-      contents: { parts: [{ text: prompt }] }
+      model: 'gemini-3-pro-image-preview',
+      contents: {
+        parts: [{ text: `Social media advertising visual, high-quality photography, ${prompt}` }],
+      },
+      config: {
+        imageConfig: {
+          aspectRatio: "1:1",
+          imageSize: "1K"
+        }
+      }
     });
+
+    if (!response.candidates?.[0]?.content?.parts) throw new Error("無效的 API 回傳");
+
     for (const part of response.candidates[0].content.parts) {
-      if (part.inlineData) return `data:image/png;base64,${part.inlineData.data}`;
+      if (part.inlineData) {
+        return `data:image/png;base64,${part.inlineData.data}`;
+      }
     }
-    throw new Error("圖片數據缺失");
+    throw new Error("找不到圖片數據");
   } catch (error: any) {
+    console.error("Image Gen Error:", error);
+    if (error.message?.includes("429") || error.message?.includes("quota")) {
+      throw new Error("配額限制：目前的 API Key 可能沒有圖片生成配額。請嘗試選取具備付費專案的 Key。");
+    }
     throw error;
   }
 };
