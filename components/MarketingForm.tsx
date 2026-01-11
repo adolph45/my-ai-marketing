@@ -30,90 +30,90 @@ const MarketingForm: React.FC<Props> = ({ formData, setFormData, onSubmit, loadi
     setFormData({ ...formData, [field]: value });
   };
 
-  const labelClasses = "font-black text-slate-500 uppercase tracking-[0.2em] mb-3 block ml-4 text-[10px]";
+  const labelClasses = "font-black text-[#4A3728]/50 uppercase tracking-[0.4em] mb-4 block ml-6 text-[10px]";
 
   return (
-    <form onSubmit={handleSubmit} className="glass-card p-12 md:p-16 space-y-16 animate-in fade-in duration-700">
-      <div className="flex items-center justify-between border-b border-slate-100 pb-10">
-        <div className="text-left space-y-1">
-          <h3 className="text-2xl font-extrabold text-slate-900">行銷策略參數</h3>
-          <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Configure AI Strategy Engine</p>
+    <form onSubmit={handleSubmit} className="glass-card p-14 md:p-20 space-y-20 animate-in fade-in duration-1000">
+      <div className="flex items-center justify-between border-b-2 border-[#F2E7D5]/40 pb-12">
+        <div className="text-left space-y-2">
+          <h3 className="text-3xl font-black text-[#4A3728]">核心策略配置</h3>
+          <p className="text-[10px] text-[#D69A73] font-black uppercase tracking-[0.5em]">Configure Strategy Parameters</p>
         </div>
-        <div className="w-14 h-14 bg-slate-50 text-slate-400 rounded-3xl flex items-center justify-center border border-slate-100 shadow-sm"><Info size={24} /></div>
+        <div className="w-16 h-16 bg-white text-[#F2E7D5] rounded-[24px] flex items-center justify-center border border-[#F2E7D5] shadow-xl"><Info size={28} /></div>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
-        <div className="space-y-2 text-left">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
+        <div className="space-y-3 text-left">
           <label className={labelClasses}>產業類型</label>
-          <input type="text" placeholder="例如：咖啡廳..." value={formData.industry} onChange={(e) => handleChange('industry', e.target.value)} required />
+          <input type="text" placeholder="例如：精品咖啡店..." value={formData.industry} onChange={(e) => handleChange('industry', e.target.value)} required />
         </div>
-        <div className="space-y-2 text-left">
+        <div className="space-y-3 text-left">
           <label className={labelClasses}>創意風格</label>
           <select value={formData.style} onChange={(e) => handleChange('style', e.target.value)}>
             {styles.map(s => <option key={s.name} value={s.name}>{s.name} ({s.desc})</option>)}
           </select>
         </div>
-        <div className="space-y-2 text-left">
+        <div className="space-y-3 text-left">
           <label className={labelClasses}>主要受眾</label>
           <select value={formData.audience} onChange={(e) => handleChange('audience', e.target.value)}>
             {['B端中盤商', 'C端消費者', 'B端零售商', '準備要創業', '企業經營者'].map(o => <option key={o} value={o}>{o}</option>)}
           </select>
         </div>
-        <div className="space-y-2 text-left">
+        <div className="space-y-3 text-left">
           <label className={labelClasses}>戰略目標</label>
           <select value={formData.marketingGoal} onChange={(e) => handleChange('marketingGoal', e.target.value)}>
             {['行業專業權威性', '有趣的專業領域知識', '活潑的介紹我的專業', '生活化的介紹專業知識', '產生同業合作機會'].map(o => <option key={o} value={o}>{o}</option>)}
           </select>
         </div>
-        <div className="space-y-2 text-left">
+        <div className="space-y-3 text-left">
           <label className={labelClasses}>核心重點</label>
           <select value={formData.strategyFocus} onChange={(e) => handleChange('strategyFocus', e.target.value)}>
             {['更多我主要客戶的銷售', '更多陌生客戶的開發', '我與粉絲的互動', '讓有興趣的人來詢問'].map(o => <option key={o} value={o}>{o}</option>)}
           </select>
         </div>
-        <div className="space-y-2 text-left">
+        <div className="space-y-3 text-left">
           <label className={labelClasses}>品牌名稱</label>
-          <input type="text" placeholder="選填" value={formData.brandName} onChange={(e) => handleChange('brandName', e.target.value)} />
+          <input type="text" placeholder="選填品牌名..." value={formData.brandName} onChange={(e) => handleChange('brandName', e.target.value)} />
         </div>
       </div>
 
-      <div className="space-y-12 pt-12 border-t border-slate-100">
-        <div className="space-y-8 text-left">
-          <h4 className="flex items-center gap-3 text-sm font-black text-slate-400 uppercase tracking-[0.3em]"><Target size={18} className="text-emerald-500" /> Benchmark Brands</h4>
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="space-y-2">
-              <label className={labelClasses}>看齊品牌</label>
-              <input type="text" placeholder="品牌名稱" value={formData.targetBrandName} onChange={(e) => handleChange('targetBrandName', e.target.value)} />
+      <div className="space-y-16 pt-16 border-t-2 border-[#F2E7D5]/40">
+        <div className="space-y-10 text-left">
+          <h4 className="flex items-center gap-4 text-xs font-black text-[#4A3728]/40 uppercase tracking-[0.5em]"><Target size={20} className="text-[#D69A73]" /> 競爭品牌對標</h4>
+          <div className="grid md:grid-cols-2 gap-10">
+            <div className="space-y-3">
+              <label className={labelClasses}>對標對象</label>
+              <input type="text" placeholder="品牌或粉專名稱" value={formData.targetBrandName} onChange={(e) => handleChange('targetBrandName', e.target.value)} />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className={labelClasses}>參考網址</label>
-              <input type="url" placeholder="URL" value={formData.targetBrandUrl} onChange={(e) => handleChange('targetBrandUrl', e.target.value)} />
+              <input type="url" placeholder="https://..." value={formData.targetBrandUrl} onChange={(e) => handleChange('targetBrandUrl', e.target.value)} />
             </div>
           </div>
         </div>
         
-        <div className="space-y-8 text-left">
-          <h4 className="flex items-center gap-3 text-sm font-black text-slate-400 uppercase tracking-[0.3em]"><Heart size={18} className="text-pink-500" /> Inspiration Accounts</h4>
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="space-y-2">
-              <label className={labelClasses}>喜歡的創作者</label>
-              <input type="text" placeholder="名稱" value={formData.favoriteCreatorName} onChange={(e) => handleChange('favoriteCreatorName', e.target.value)} />
+        <div className="space-y-10 text-left">
+          <h4 className="flex items-center gap-4 text-xs font-black text-[#4A3728]/40 uppercase tracking-[0.5em]"><Heart size={20} className="text-[#D69A73]" /> 靈感來源帳號</h4>
+          <div className="grid md:grid-cols-2 gap-10">
+            <div className="space-y-3">
+              <label className={labelClasses}>喜歡的帳號</label>
+              <input type="text" placeholder="帳號名稱" value={formData.favoriteCreatorName} onChange={(e) => handleChange('favoriteCreatorName', e.target.value)} />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className={labelClasses}>參考網址</label>
-              <input type="url" placeholder="URL" value={formData.favoriteCreatorUrl} onChange={(e) => handleChange('favoriteCreatorUrl', e.target.value)} />
+              <input type="url" placeholder="https://..." value={formData.favoriteCreatorUrl} onChange={(e) => handleChange('favoriteCreatorUrl', e.target.value)} />
             </div>
           </div>
         </div>
       </div>
 
-      <div className="pt-12 border-t border-slate-100 text-left">
-        <label className={labelClasses}>聯絡資訊與 Call-to-Action</label>
-        <textarea className="w-full h-40 !rounded-[32px]" placeholder="官方LINE、網站連結等..." value={formData.contactInfo} onChange={(e) => handleChange('contactInfo', e.target.value)} />
+      <div className="pt-16 border-t-2 border-[#F2E7D5]/40 text-left">
+        <label className={labelClasses}>聯絡資訊與 Call-to-Action (CTA)</label>
+        <textarea className="w-full h-48 !rounded-[40px] shadow-inner" placeholder="請提供您的聯絡方式，將自動生成於貼文末端..." value={formData.contactInfo} onChange={(e) => handleChange('contactInfo', e.target.value)} />
       </div>
 
-      <button type="submit" disabled={loading} className="w-full btn-emerald py-8 font-black text-sm tracking-[0.3em] uppercase flex items-center justify-center space-x-4 shadow-2xl shadow-emerald-200 transition-all active:scale-[0.98] disabled:opacity-50">
-        {loading ? <><Loader2 className="animate-spin" /><span>策略引擎運算中...</span></> : <><Wand2 /><span>啟動我的行銷計畫</span></>}
+      <button type="submit" disabled={loading} className="w-full btn-primary-coffee py-9 font-black text-sm tracking-[0.4em] uppercase flex items-center justify-center space-x-5 shadow-3xl shadow-[#D69A73]/30 disabled:opacity-50">
+        {loading ? <><Loader2 className="animate-spin" size={24} /><span>策略調配中，請稍候...</span></> : <><Wand2 size={24} /><span>生成我的行銷計畫</span></>}
       </button>
     </form>
   );
