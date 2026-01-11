@@ -109,14 +109,13 @@ export const generateMarketingPlan = async (input: MarketingInput): Promise<Mark
 
 /**
  * Generates an image using gemini-2.5-flash-image.
- * Switched from gemini-3-pro-image-preview to resolve permission issues for standard API keys.
  */
 export const generatePostImage = async (prompt: string): Promise<string> => {
+  // Freshly initialize inside the function to ensure current context's API KEY is used
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   try {
     const response = await ai.models.generateContent({
-      // Use 2.5 flash image for broader compatibility with standard API keys
       model: 'gemini-2.5-flash-image',
       contents: {
         parts: [{ text: `High quality professional social media visual, commercial photography style, ${prompt}` }],
@@ -128,16 +127,24 @@ export const generatePostImage = async (prompt: string): Promise<string> => {
       }
     });
 
-    if (!response.candidates?.[0]?.content?.parts) throw new Error("無效的 API 回傳");
+    if (!response.candidates?.[0]?.content?.parts) {
+      throw new Error("API 回傳內容不完整。");
+    }
 
-    for (const part of response.candidates[0].content.parts) {
+    const parts = response.candidates[0].content.parts;
+    for (const part of parts) {
       if (part.inlineData) {
         return `data:image/png;base64,${part.inlineData.data}`;
       }
     }
-    throw new Error("找不到圖片數據");
+    
+    throw new Error("模型未回傳任何圖片數據，請嘗試更換提示詞。");
   } catch (error: any) {
-    console.error("Image Gen Error:", error);
-    throw new Error(error.message || "圖片生成發生錯誤，請檢查 API 金鑰權限。");
+    console.error("Gemini API Error:", error);
+    // Specifically identifying permission issues
+    if (error.message?.toLowerCase().includes("permission") || error.message?.toLowerCase().includes("forbidden")) {
+      throw new Error("API 金鑰權限不足：請確保您的 Google Cloud 專案已開啟 Imagen 或實驗性模型服務。");
+    }
+    throw new Error(error.message || "影像生成失敗，請稍後再試。");
   }
 };

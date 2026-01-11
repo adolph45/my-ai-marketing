@@ -125,7 +125,7 @@ const App: React.FC = () => {
           <div className="space-y-4">
             <h1 className="text-6xl font-black tracking-tight text-[#4A3728]">Welcome</h1>
             <p className="text-[#4A3728]/70 font-semibold max-w-[280px] mx-auto text-sm leading-relaxed tracking-wide">
-              專業 AI 行銷顧問引擎，為您調配最具溫度的品牌社群藍圖。
+              AI 行銷顧問引擎V2.0，為您調配最具溫度的品牌社群藍圖。
             </p>
           </div>
 
