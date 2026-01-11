@@ -83,7 +83,6 @@ const App: React.FC = () => {
   if (!user) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#F2E7D5] relative overflow-hidden px-6">
-        {/* Background Coffee Elements (Abstract Soft Circles) */}
         <div className="absolute top-[-10%] left-[-5%] w-[400px] h-[400px] bg-[#D69A73]/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-[20%] right-[-10%] w-[500px] h-[500px] bg-[#D69A73]/05 rounded-full blur-3xl"></div>
 
@@ -135,7 +134,8 @@ const App: React.FC = () => {
                <Rocket size={18} />
                <span>Strategy Brewing</span>
             </div>
-            <h2 className="text-5xl font-black tracking-tight text-[#4A3728]">設定我的貼文計畫</h2>
+            {/* 標題字體縮小 1/2 (原本 text-5xl 改為 text-2xl) */}
+            <h2 className="text-2xl font-black tracking-tight text-[#4A3728]">設定我的貼文計畫</h2>
           </div>
           <MarketingForm formData={formData} setFormData={setFormData} onSubmit={handleGeneratePlan} loading={loading} />
         </div>
@@ -152,7 +152,7 @@ const App: React.FC = () => {
       )}
       {activeTab === 'history' && (
         <div className="space-y-12 animate-in fade-in duration-1000">
-          <h2 className="text-6xl font-black tracking-tight text-[#4A3728]">存檔紀錄</h2>
+          <h2 className="text-2xl font-black tracking-tight text-[#4A3728]">存檔紀錄</h2>
           <div className="grid gap-8">
             {history.map((p) => (
               <div key={p.id} className="glass-card p-12 flex items-center justify-between cursor-pointer hover:bg-white transition-all hover:scale-[1.01] group" onClick={() => { setCurrentPlan(p); setActiveTab('dashboard'); }}>
