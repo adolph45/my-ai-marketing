@@ -10,21 +10,24 @@ import { Rocket, ChevronRight, Sparkles } from 'lucide-react';
 const STORAGE_KEYS = {
   HISTORY: 'marketing_history_v4',
   USER: 'marketing_user_v4',
-  FORM: 'marketing_form_v4'
+  FORM: 'marketing_form_v4',
+  USAGE: 'marketing_usage_count_v4'
 };
 
+const MAX_USAGE = 35;
+
 const DEFAULT_FORM: MarketingInput = {
-  industry: '果乾批發',
+  industry: '', // 預設為空白
   brandName: '',
-  style: '簡約風',
+  style: '簡約風 (主色調數種，低彩度，中間明度與亮度，線條乾淨俐落)',
   audience: 'C端消費者',
-  marketingGoal: '吸引客戶詢問下單',
+  marketingGoal: '行業專業權威性',
   strategyFocus: '讓有興趣的人來詢問',
   targetBrandName: '',
   targetBrandUrl: '',
   favoriteCreatorName: '',
   favoriteCreatorUrl: '',
-  contactInfo: '官方LINE：@your_brand\n官方網站：https://example.com\n連絡電話：0900-000-000',
+  contactInfo: '我們是ooooo\n如有任何需求或合作意願，歡迎隨時聯繫！\n官方LINE：@UUUU\n官方網站：https://example.com\n連絡電話：0900-000-000',
 };
 
 const App: React.FC = () => {
@@ -35,6 +38,7 @@ const App: React.FC = () => {
   const [user, setUser] = useState<{ username: string } | null>(null);
   const [nicknameInput, setNicknameInput] = useState('');
   const [formData, setFormData] = useState<MarketingInput>(DEFAULT_FORM);
+  const [usageCount, setUsageCount] = useState(0);
 
   useEffect(() => {
     const savedHistory = localStorage.getItem(STORAGE_KEYS.HISTORY);
@@ -50,17 +54,31 @@ const App: React.FC = () => {
         if (parsed) setFormData(parsed);
       } catch (e) {}
     }
+
+    const savedUsage = localStorage.getItem(STORAGE_KEYS.USAGE);
+    if (savedUsage) setUsageCount(parseInt(savedUsage, 10));
   }, []);
 
   const handleGeneratePlan = async (input: MarketingInput) => {
+    if (usageCount >= MAX_USAGE) {
+      alert('今日額度已滿');
+      return;
+    }
+
     setLoading(true);
     try {
       const plan = await generateMarketingPlan(input);
       setCurrentPlan(plan);
       const newHistory = [plan, ...history].slice(0, 15);
       setHistory(newHistory);
+      
+      const newUsage = usageCount + 1;
+      setUsageCount(newUsage);
+      
       localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(newHistory));
       localStorage.setItem(STORAGE_KEYS.FORM, JSON.stringify(input));
+      localStorage.setItem(STORAGE_KEYS.USAGE, newUsage.toString());
+      
       setActiveTab('dashboard');
     } catch (error: any) {
       console.error("Generate Error:", error);
@@ -78,6 +96,13 @@ const App: React.FC = () => {
     const updatedHistory = history.map(h => h.id === updatedPlan.id ? updatedPlan : h);
     setHistory(updatedHistory);
     localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(updatedHistory));
+  };
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nicknameInput.trim()) return;
+    setUser({ username: nicknameInput });
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify({ username: nicknameInput }));
   };
 
   if (!user) {
@@ -104,7 +129,7 @@ const App: React.FC = () => {
             </p>
           </div>
 
-          <form onSubmit={(e) => { e.preventDefault(); if (nicknameInput.trim()) { setUser({ username: nicknameInput }); localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify({ username: nicknameInput })); } }} className="space-y-8 pt-4">
+          <form onSubmit={handleLogin} className="space-y-8 pt-4">
             <div className="space-y-3 text-left">
               <label className="text-[#4A3728] text-[10px] font-black uppercase tracking-[0.3em] ml-6">Your Nickname</label>
               <input 
@@ -134,8 +159,12 @@ const App: React.FC = () => {
                <Rocket size={18} />
                <span>Strategy Brewing</span>
             </div>
-            {/* 標題字體縮小 1/2 (原本 text-5xl 改為 text-2xl) */}
-            <h2 className="text-2xl font-black tracking-tight text-[#4A3728]">設定我的貼文計畫</h2>
+            <div className="flex justify-between items-end">
+              <h2 className="text-xl font-black tracking-tight text-[#4A3728]">設定我的貼文計畫</h2>
+              <span className="text-[10px] font-black text-[#D69A73] uppercase tracking-widest">
+                裝置剩餘次數: {MAX_USAGE - usageCount}
+              </span>
+            </div>
           </div>
           <MarketingForm formData={formData} setFormData={setFormData} onSubmit={handleGeneratePlan} loading={loading} />
         </div>
@@ -152,16 +181,16 @@ const App: React.FC = () => {
       )}
       {activeTab === 'history' && (
         <div className="space-y-12 animate-in fade-in duration-1000">
-          <h2 className="text-2xl font-black tracking-tight text-[#4A3728]">存檔紀錄</h2>
+          <h2 className="text-xl font-black tracking-tight text-[#4A3728]">存檔紀錄</h2>
           <div className="grid gap-8">
             {history.map((p) => (
               <div key={p.id} className="glass-card p-12 flex items-center justify-between cursor-pointer hover:bg-white transition-all hover:scale-[1.01] group" onClick={() => { setCurrentPlan(p); setActiveTab('dashboard'); }}>
                 <div className="flex items-center space-x-8">
                   <div className="w-16 h-16 bg-[#F2E7D5] rounded-[24px] flex items-center justify-center text-[#D69A73] font-black text-xl shadow-inner group-hover:bg-[#D69A73] group-hover:text-white transition-colors">
-                    {p.input.industry.charAt(0)}
+                    {p.input.industry ? p.input.industry.charAt(0) : 'P'}
                   </div>
                   <div className="text-left">
-                    <h4 className="text-2xl font-black text-[#4A3728]">{p.input.brandName || p.input.industry}</h4>
+                    <h4 className="text-2xl font-black text-[#4A3728]">{p.input.brandName || p.input.industry || '未命名計畫'}</h4>
                     <p className="text-[10px] text-[#4A3728]/50 font-black uppercase tracking-[0.3em] mt-2">
                       {new Date(p.timestamp).toLocaleDateString()} • {p.input.marketingGoal}
                     </p>

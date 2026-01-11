@@ -2,46 +2,52 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { MarketingInput, MarketingPlan } from "../types";
 
+/**
+ * Generates a comprehensive 12-week marketing plan using Gemini 3 Pro.
+ * Adheres to guidelines for complex reasoning tasks and specific business frameworks.
+ */
 export const generateMarketingPlan = async (input: MarketingInput): Promise<MarketingPlan> => {
-  const apiKey = process.env.API_KEY;
-
-  if (!apiKey || apiKey === '' || apiKey === 'undefined') {
-    throw new Error("系統 API_KEY 尚未配置，請聯繫管理員。");
-  }
-
-  const ai = new GoogleGenAI({ apiKey: apiKey });
+  // Always use provided API Key from environment
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
-  const systemInstruction = `請扮演一位世界級的行銷策略專家與文案大師。
-【核心邏輯框架】
-基於 JTBD 任務理論、ODI 成果驅動創新、西奧多·李維特觀點（關注結果而非產品）與馬斯洛需求理論進行策略與第一性原理規劃。
+  const systemInstruction = `你是一位世界級的社群行銷策略家。
+【任務程序】
+1. 深入研究「${input.industry}」領域過去 3 年內的行銷議題與成功案例。
+2. 比重分配：70% 必須來自「台灣地區」的案例與社群帳號，30% 為國際案例。
+3. 法令合規：嚴格考量台灣相關法律規範進行規劃。
+
+【核心理論內化（嚴禁在輸出中提及理論名稱）】
+- JTBD (Jobs-to-be-Done)：關注用戶要達成的「結果」而非產品規格（參考《創新的用途理論》、HBR 奶昔案例、西奧多·李維特鑽孔理論）。
+- ODI (Outcome-Driven Innovation)：以成果為驅動的創新流程。
+- 馬斯洛需求理論：定位受眾的心理需求層級。
 
 【內容產出規則】
 - 第一週【準備週】：
-  * 人物誌洞察 (Persona)：請建立一份「人物誌洞察表格」（使用 Markdown 表格語法格式化於字串中），包含用戶的背景、核心目標、預期成果、遇到的阻礙與心理需求。總篇幅需達 300 字深度分析。
-  * 品牌定位策略：請撰寫至少 300 字的定位策略，說明如何滿足上述受眾的需求。
-  * 全部內容必須使用「繁體中文」撰寫。
-  * 內容中【絕對嚴禁】出現理論名稱，如「JTBD」、「ODI」、「馬斯洛」、「奶昔案例」、「安東尼·烏爾威克」、「西奧多·李維特」等文字。請將理論內化為淺顯易懂的商業建議。
+  * 建立一份「深度人物誌洞察表格」(Persona)，包含背景、核心目標、預期成果、阻礙、心理需求。
+  * 品牌價值定位策略。
 - 第二至十二週【貼文週】：
-  * 每週包含 1 篇 Facebook (約 300字) 與 1 篇 Instagram (約 150字)。
-  * 視覺風格：${input.style}。
-  * 貼文需包含日期與星期幾。計畫起點為最近的下一個週一。
-  * 每篇貼文末尾必須自動帶入聯絡資訊 CTA：\n${input.contactInfo}。
-- 蒐集最近 3 年台灣（比重 70%）的相關行銷案例與法令訊息進行規劃。`;
+  * 每週 1 篇 FB (300字) + 1 篇 IG (150字)。
+  * 風格：${input.style}。
+  * 計畫起點為最近的下一個週一，需標註日期與星期幾。
+  * 每一篇貼文末尾必須包含 CTA 資訊：\n${input.contactInfo}。
+- 全部內容必須使用「繁體中文」撰寫。
+- 【絕對禁令】：不可出現「JTBD」、「ODI」、「馬斯洛」、「奶昔案例」、「安東尼·烏爾威克」、「鑽孔理論」等理論文字。請將其內化為專業的商業建議。`;
 
   const prompt = `
-【行銷參數】
-產業：${input.industry}
-創意風格：${input.style}
-受眾：${input.audience}
-目標：${input.marketingGoal}
-重點：${input.strategyFocus}
-參考對象：${input.targetBrandName || '同行領先者'} (${input.targetBrandUrl || '無'}), ${input.favoriteCreatorName || '風格創作者'} (${input.favoriteCreatorUrl || '無'})
+【行銷參數設定】
+- 產業類型：${input.industry}
+- 創意風格：${input.style}
+- 主要受眾：${input.audience}
+- 戰略目標：${input.marketingGoal}
+- 核心重點：${input.strategyFocus}
+- 對標品牌/帳號：${input.targetBrandName || '自動蒐集業內領先者'} (${input.targetBrandUrl || ''})
+- 喜愛的創作者：${input.favoriteCreatorName || '自動蒐集相關風格創作者'} (${input.favoriteCreatorUrl || ''})
 
-請直接生成完整的 12 週 JSON 計畫，確保第一週包含詳細的表格化人物誌與品牌定位。`;
+請根據以上參數，運用 JTBD 與 ODI 的核心邏輯，為我打造一份為期 12 週的行銷計畫。`;
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-3-pro-preview",
       contents: prompt,
       config: {
         systemInstruction,
@@ -59,8 +65,8 @@ export const generateMarketingPlan = async (input: MarketingInput): Promise<Mark
                   prepPhase: {
                     type: Type.OBJECT,
                     properties: {
-                      persona: { type: Type.STRING, description: "包含 Markdown 表格的人物誌洞察" },
-                      brandPositioning: { type: Type.STRING, description: "品牌價值與定位策略" }
+                      persona: { type: Type.STRING, description: "Markdown 格式的人物誌分析表格" },
+                      brandPositioning: { type: Type.STRING, description: "品牌定位與價值觀建議" }
                     }
                   },
                   posts: {
@@ -86,12 +92,12 @@ export const generateMarketingPlan = async (input: MarketingInput): Promise<Mark
       }
     });
 
-    const rawData = JSON.parse(response.text);
+    const rawData = JSON.parse(response.text || '{}');
     return {
       id: Math.random().toString(36).substr(2, 9),
       timestamp: Date.now(),
       input,
-      weeks: rawData.weeks.map((w: any) => ({
+      weeks: (rawData.weeks || []).map((w: any) => ({
         ...w,
         posts: w.posts?.map((p: any) => ({ ...p, isCompleted: false })) || []
       }))
@@ -101,20 +107,23 @@ export const generateMarketingPlan = async (input: MarketingInput): Promise<Mark
   }
 };
 
+/**
+ * Generates an image using gemini-2.5-flash-image.
+ * Switched from gemini-3-pro-image-preview to resolve permission issues for standard API keys.
+ */
 export const generatePostImage = async (prompt: string): Promise<string> => {
-  const apiKey = process.env.API_KEY;
-  const ai = new GoogleGenAI({ apiKey: apiKey });
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-image-preview',
+      // Use 2.5 flash image for broader compatibility with standard API keys
+      model: 'gemini-2.5-flash-image',
       contents: {
-        parts: [{ text: `Professional commercial photography, social media ad visual, 4k, ${prompt}` }],
+        parts: [{ text: `High quality professional social media visual, commercial photography style, ${prompt}` }],
       },
       config: {
         imageConfig: {
-          aspectRatio: "1:1",
-          imageSize: "1K"
+          aspectRatio: "1:1"
         }
       }
     });
@@ -129,6 +138,6 @@ export const generatePostImage = async (prompt: string): Promise<string> => {
     throw new Error("找不到圖片數據");
   } catch (error: any) {
     console.error("Image Gen Error:", error);
-    throw new Error(error.message || "圖片生成發生錯誤。");
+    throw new Error(error.message || "圖片生成發生錯誤，請檢查 API 金鑰權限。");
   }
 };
