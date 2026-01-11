@@ -6,40 +6,38 @@ export const generateMarketingPlan = async (input: MarketingInput): Promise<Mark
   const apiKey = process.env.API_KEY;
 
   if (!apiKey || apiKey === '' || apiKey === 'undefined') {
-    throw new Error("API_KEY 缺失，請確保已在環境變數或透過金鑰選取對話框設定金鑰。");
+    throw new Error("系統 API_KEY 尚未配置，請聯繫管理員。");
   }
 
   const ai = new GoogleGenAI({ apiKey: apiKey });
   
-  const systemInstruction = `你是一位世界級的行銷策略專家與文案大師。
+  const systemInstruction = `請扮演一位世界級的行銷策略專家與文案大師。
 【核心邏輯框架】
-1. JTBD 任務理論：專注於用戶想達成的「進展」。
-2. ODI 成果驅動創新：專注於用戶期待的成果。
-3. 西奧多·李維特觀點：人們想要的是「孔」而非「鑽頭」。
-4. 馬斯洛需求理論：對應心理需求層次。
+基於 JTBD 任務理論、ODI 成果驅動創新、西奧多·李維特觀點（關注結果而非產品）與馬斯洛需求理論進行策略與第一性原理規劃。
 
 【內容產出規則】
 - 第一週【準備週】：
-  * 人物誌洞察 (Persona)：請根據 JTBD 框架撰寫至少 300 字的深度分析。
-  * 品牌定位策略：請根據 ODI 與馬斯洛理論撰寫至少 300 字的策略。
+  * 人物誌洞察 (Persona)：請建立一份「人物誌洞察表格」（使用 Markdown 表格語法格式化於字串中），包含用戶的背景、核心目標、預期成果、遇到的阻礙與心理需求。總篇幅需達 300 字深度分析。
+  * 品牌定位策略：請撰寫至少 300 字的定位策略，說明如何滿足上述受眾的需求。
   * 全部內容必須使用「繁體中文」撰寫。
-  * 內容中嚴禁出現「JTBD」、「ODI」、「馬斯洛」、「鑽頭理論」等學術專有名詞。
+  * 內容中【絕對嚴禁】出現理論名稱，如「JTBD」、「ODI」、「馬斯洛」、「奶昔案例」、「安東尼·烏爾威克」、「西奧多·李維特」等文字。請將理論內化為淺顯易懂的商業建議。
 - 第二至十二週【貼文週】：
-  * 每週 1 篇 Facebook (300字) 與 1 篇 Instagram (150字)。
-  * 風格必須符合：${input.style}。
-  * 每篇貼文末尾必須包含聯絡資訊 CTA：\n${input.contactInfo}。
-- 根據最近 3 年台灣行銷案例與法令進行規劃。`;
+  * 每週包含 1 篇 Facebook (約 300字) 與 1 篇 Instagram (約 150字)。
+  * 視覺風格：${input.style}。
+  * 貼文需包含日期與星期幾。計畫起點為最近的下一個週一。
+  * 每篇貼文末尾必須自動帶入聯絡資訊 CTA：\n${input.contactInfo}。
+- 蒐集最近 3 年台灣（比重 70%）的相關行銷案例與法令訊息進行規劃。`;
 
   const prompt = `
 【行銷參數】
 產業：${input.industry}
+創意風格：${input.style}
 受眾：${input.audience}
 目標：${input.marketingGoal}
 重點：${input.strategyFocus}
-參考品牌：${input.targetBrandName} (${input.targetBrandUrl})
-參考帳號：${input.favoriteCreatorName} (${input.favoriteCreatorUrl})
+參考對象：${input.targetBrandName || '同行領先者'} (${input.targetBrandUrl || '無'}), ${input.favoriteCreatorName || '風格創作者'} (${input.favoriteCreatorUrl || '無'})
 
-請直接生成完整的 12 週 JSON 計畫。`;
+請直接生成完整的 12 週 JSON 計畫，確保第一週包含詳細的表格化人物誌與品牌定位。`;
 
   try {
     const response = await ai.models.generateContent({
@@ -61,8 +59,8 @@ export const generateMarketingPlan = async (input: MarketingInput): Promise<Mark
                   prepPhase: {
                     type: Type.OBJECT,
                     properties: {
-                      persona: { type: Type.STRING },
-                      brandPositioning: { type: Type.STRING }
+                      persona: { type: Type.STRING, description: "包含 Markdown 表格的人物誌洞察" },
+                      brandPositioning: { type: Type.STRING, description: "品牌價值與定位策略" }
                     }
                   },
                   posts: {
@@ -111,7 +109,7 @@ export const generatePostImage = async (prompt: string): Promise<string> => {
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-image-preview',
       contents: {
-        parts: [{ text: `Social media advertising visual, high-quality photography, ${prompt}` }],
+        parts: [{ text: `Professional commercial photography, social media ad visual, 4k, ${prompt}` }],
       },
       config: {
         imageConfig: {
@@ -131,9 +129,6 @@ export const generatePostImage = async (prompt: string): Promise<string> => {
     throw new Error("找不到圖片數據");
   } catch (error: any) {
     console.error("Image Gen Error:", error);
-    if (error.message?.includes("429") || error.message?.includes("quota")) {
-      throw new Error("配額限制：目前的 API Key 可能沒有圖片生成配額。請嘗試選取具備付費專案的 Key。");
-    }
-    throw error;
+    throw new Error(error.message || "圖片生成發生錯誤。");
   }
 };
