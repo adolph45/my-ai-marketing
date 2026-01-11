@@ -5,12 +5,12 @@ import MarketingForm from './components/MarketingForm';
 import PlanDisplay from './components/PlanDisplay';
 import { MarketingInput, MarketingPlan } from './types';
 import { generateMarketingPlan } from './services/geminiService';
-import { Rocket, ChevronRight, Sparkles, UserCheck } from 'lucide-react';
+import { Rocket, ChevronRight, Sparkles } from 'lucide-react';
 
 const STORAGE_KEYS = {
-  HISTORY: 'marketing_history_v3',
-  USER: 'marketing_user_v3',
-  FORM: 'marketing_form_v3'
+  HISTORY: 'marketing_history_v4',
+  USER: 'marketing_user_v4',
+  FORM: 'marketing_form_v4'
 };
 
 const DEFAULT_FORM: MarketingInput = {
@@ -82,40 +82,43 @@ const App: React.FC = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FF8A8A] relative overflow-hidden px-6">
-        {/* SVG Background Wave from Image 1 style */}
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#F2E7D5] relative overflow-hidden px-6">
+        {/* Background Coffee Elements (Abstract Soft Circles) */}
+        <div className="absolute top-[-10%] left-[-5%] w-[400px] h-[400px] bg-[#D69A73]/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-[20%] right-[-10%] w-[500px] h-[500px] bg-[#D69A73]/05 rounded-full blur-3xl"></div>
+
         <div className="wave-container">
           <svg viewBox="0 0 1440 320" xmlns="http://www.w3.org/2000/svg">
-            <path fill="#ffffff" fillOpacity="1" d="M0,192L60,208C120,224,240,256,360,245.3C480,235,600,181,720,176C840,171,960,213,1080,218.7C1200,224,1320,192,1380,176L1440,160L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"></path>
+            <path fill="#FDF8F1" fillOpacity="1" d="M0,224L48,218.7C96,213,192,203,288,208C384,213,480,235,576,213.3C672,192,768,128,864,122.7C960,117,1056,171,1152,197.3C1248,224,1344,224,1392,224L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
           </svg>
         </div>
 
-        <div className="max-w-md w-full relative z-10 text-center space-y-8 mb-20">
-          <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto shadow-2xl border border-white/30">
-             <Sparkles className="text-white" size={40} />
+        <div className="max-w-md w-full relative z-10 text-center space-y-12 mb-20">
+          <div className="w-24 h-24 bg-white/60 backdrop-blur-xl rounded-[40px] flex items-center justify-center mx-auto shadow-2xl border border-white/80">
+             <Sparkles className="text-[#D69A73]" size={48} />
           </div>
           
           <div className="space-y-4">
-            <h1 className="text-5xl font-extrabold tracking-tight text-white">Welcome</h1>
-            <p className="text-white/80 font-medium max-w-[280px] mx-auto text-sm leading-relaxed">
-              您的專屬 AI 行銷策略引擎，打造專業且具影響力的社群計畫。
+            <h1 className="text-6xl font-black tracking-tight text-[#4A3728]">Welcome</h1>
+            <p className="text-[#4A3728]/70 font-semibold max-w-[280px] mx-auto text-sm leading-relaxed tracking-wide">
+              專業 AI 行銷顧問引擎，為您調配最具溫度的品牌社群藍圖。
             </p>
           </div>
 
-          <form onSubmit={(e) => { e.preventDefault(); if (nicknameInput.trim()) { setUser({ username: nicknameInput }); localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify({ username: nicknameInput })); } }} className="space-y-6 pt-4">
-            <div className="space-y-2 text-left">
-              <label className="text-white text-xs font-bold uppercase tracking-widest ml-4">暱稱</label>
+          <form onSubmit={(e) => { e.preventDefault(); if (nicknameInput.trim()) { setUser({ username: nicknameInput }); localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify({ username: nicknameInput })); } }} className="space-y-8 pt-4">
+            <div className="space-y-3 text-left">
+              <label className="text-[#4A3728] text-[10px] font-black uppercase tracking-[0.3em] ml-6">Your Nickname</label>
               <input 
                 type="text" 
                 required
-                className="w-full !bg-white/10 !border-white/20 !text-white !placeholder-white/50 backdrop-blur-md rounded-[24px] px-8 py-5 text-lg font-semibold outline-none focus:!bg-white/20 transition-all"
-                placeholder="輸入您的稱呼"
+                className="w-full !bg-white/70 !border-white/90 !text-[#4A3728] !placeholder-[#4A3728]/30 backdrop-blur-lg rounded-[32px] px-10 py-6 text-lg font-bold outline-none focus:!bg-white transition-all shadow-sm"
+                placeholder="輸入您的稱呼..."
                 value={nicknameInput}
                 onChange={(e) => setNicknameInput(e.target.value)}
               />
             </div>
-            <button type="submit" className="w-full bg-white text-[#FF8A8A] hover:bg-white/90 py-6 rounded-[24px] font-black text-sm tracking-[0.2em] uppercase shadow-2xl transition-all active:scale-95 flex items-center justify-center gap-3">
-              進入系統 <ChevronRight size={18} />
+            <button type="submit" className="w-full btn-primary-coffee py-7 font-black text-sm tracking-[0.3em] uppercase shadow-2xl shadow-[#D69A73]/20 flex items-center justify-center gap-3 active:scale-[0.97]">
+              進入系統 <ChevronRight size={20} />
             </button>
           </form>
         </div>
@@ -126,15 +129,13 @@ const App: React.FC = () => {
   return (
     <Layout activeTab={activeTab} setActiveTab={setActiveTab} user={user} onLogout={() => { setUser(null); localStorage.removeItem(STORAGE_KEYS.USER); }}>
       {activeTab === 'generator' && (
-        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div className="space-y-3">
-              <div className="flex items-center space-x-3 text-emerald-500 font-black text-[10px] tracking-[0.4em] uppercase">
-                 <Rocket size={16} />
-                 <span>Strategic Configuration</span>
-              </div>
-              <h2 className="text-4xl font-extrabold tracking-tight text-slate-900">設定我的貼文計畫</h2>
+        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+          <div className="space-y-3 text-left">
+            <div className="flex items-center space-x-3 text-[#D69A73] font-black text-[10px] tracking-[0.5em] uppercase">
+               <Rocket size={18} />
+               <span>Strategy Brewing</span>
             </div>
+            <h2 className="text-5xl font-black tracking-tight text-[#4A3728]">設定我的貼文計畫</h2>
           </div>
           <MarketingForm formData={formData} setFormData={setFormData} onSubmit={handleGeneratePlan} loading={loading} />
         </div>
@@ -143,35 +144,34 @@ const App: React.FC = () => {
         currentPlan ? (
           <PlanDisplay plan={currentPlan} username={user.username} onUpdatePostStatus={updatePostStatus} />
         ) : (
-          <div className="text-center py-40 glass-card bg-white/40 border-dashed border-2">
-            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">目前無載入的行銷計畫</p>
-            <button onClick={() => setActiveTab('generator')} className="mt-6 btn-emerald px-8 py-3 text-sm font-bold shadow-lg">去生成一個計畫 →</button>
+          <div className="text-center py-48 glass-card bg-white/30 border-dashed border-2 border-[#D69A73]/20">
+            <p className="text-[#4A3728]/40 text-xs font-bold uppercase tracking-[0.3em]">目前無載入的行銷計畫</p>
+            <button onClick={() => setActiveTab('generator')} className="mt-8 btn-primary-coffee px-10 py-4 text-xs font-black uppercase tracking-widest shadow-xl">開始調配方案 →</button>
           </div>
         )
       )}
       {activeTab === 'history' && (
-        <div className="space-y-12 animate-in fade-in duration-700">
-          <h2 className="text-5xl font-extrabold tracking-tight text-slate-900">存檔紀錄</h2>
-          <div className="grid gap-6">
+        <div className="space-y-12 animate-in fade-in duration-1000">
+          <h2 className="text-6xl font-black tracking-tight text-[#4A3728]">存檔紀錄</h2>
+          <div className="grid gap-8">
             {history.map((p) => (
-              <div key={p.id} className="glass-card p-10 flex items-center justify-between cursor-pointer hover:bg-white/80 transition-all hover:scale-[1.01]" onClick={() => { setCurrentPlan(p); setActiveTab('dashboard'); }}>
-                <div className="flex items-center space-x-6">
-                  <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 font-bold">
+              <div key={p.id} className="glass-card p-12 flex items-center justify-between cursor-pointer hover:bg-white transition-all hover:scale-[1.01] group" onClick={() => { setCurrentPlan(p); setActiveTab('dashboard'); }}>
+                <div className="flex items-center space-x-8">
+                  <div className="w-16 h-16 bg-[#F2E7D5] rounded-[24px] flex items-center justify-center text-[#D69A73] font-black text-xl shadow-inner group-hover:bg-[#D69A73] group-hover:text-white transition-colors">
                     {p.input.industry.charAt(0)}
                   </div>
                   <div className="text-left">
-                    <h4 className="text-xl font-bold text-slate-800">{p.input.brandName || p.input.industry}</h4>
-                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
+                    <h4 className="text-2xl font-black text-[#4A3728]">{p.input.brandName || p.input.industry}</h4>
+                    <p className="text-[10px] text-[#4A3728]/50 font-black uppercase tracking-[0.3em] mt-2">
                       {new Date(p.timestamp).toLocaleDateString()} • {p.input.marketingGoal}
                     </p>
                   </div>
                 </div>
-                <ChevronRight size={24} className="text-slate-300" />
+                <div className="w-12 h-12 rounded-full border border-[#F2E7D5] flex items-center justify-center text-[#F2E7D5] group-hover:border-[#D69A73] group-hover:text-[#D69A73] transition-all">
+                  <ChevronRight size={24} />
+                </div>
               </div>
             ))}
-            {history.length === 0 && (
-              <div className="text-center py-20 text-slate-400 font-bold italic">暫無歷史記錄</div>
-            )}
           </div>
         </div>
       )}
