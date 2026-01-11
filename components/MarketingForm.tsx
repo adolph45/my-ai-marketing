@@ -30,7 +30,8 @@ const MarketingForm: React.FC<Props> = ({ formData, setFormData, onSubmit, loadi
     setFormData({ ...formData, [field]: value });
   };
 
-  const labelClasses = "font-black text-[#4A3728]/50 uppercase tracking-[0.4em] mb-4 block ml-6 text-[10px]";
+  // 標題文字加大 100% (原本 text-[10px] 改為 text-[20px] 或 text-xl)
+  const labelClasses = "font-black text-[#4A3728]/80 uppercase tracking-[0.2em] mb-4 block ml-2 text-xl";
 
   return (
     <form onSubmit={handleSubmit} className="glass-card p-14 md:p-20 space-y-20 animate-in fade-in duration-1000">
@@ -43,37 +44,48 @@ const MarketingForm: React.FC<Props> = ({ formData, setFormData, onSubmit, loadi
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
-        <div className="space-y-3 text-left">
+        {/* 順序 1: 產業類型 */}
+        <div className="space-y-3 text-left col-span-full lg:col-span-1">
           <label className={labelClasses}>產業類型</label>
           <input type="text" placeholder="例如：精品咖啡店..." value={formData.industry} onChange={(e) => handleChange('industry', e.target.value)} required />
         </div>
-        <div className="space-y-3 text-left">
-          <label className={labelClasses}>創意風格</label>
-          <select value={formData.style} onChange={(e) => handleChange('style', e.target.value)}>
-            {styles.map(s => <option key={s.name} value={s.name}>{s.name} ({s.desc})</option>)}
-          </select>
+
+        {/* 順序 2: 品牌名稱 */}
+        <div className="space-y-3 text-left col-span-full lg:col-span-1">
+          <label className={labelClasses}>品牌名稱</label>
+          <input type="text" placeholder="選填品牌名..." value={formData.brandName} onChange={(e) => handleChange('brandName', e.target.value)} />
         </div>
-        <div className="space-y-3 text-left">
+
+        {/* 順序 3: 主要受眾 */}
+        <div className="space-y-3 text-left col-span-full lg:col-span-1">
           <label className={labelClasses}>主要受眾</label>
           <select value={formData.audience} onChange={(e) => handleChange('audience', e.target.value)}>
             {['B端中盤商', 'C端消費者', 'B端零售商', '準備要創業', '企業經營者'].map(o => <option key={o} value={o}>{o}</option>)}
           </select>
         </div>
-        <div className="space-y-3 text-left">
+
+        {/* 順序 4: 戰略目標 */}
+        <div className="space-y-3 text-left col-span-full lg:col-span-1">
           <label className={labelClasses}>戰略目標</label>
           <select value={formData.marketingGoal} onChange={(e) => handleChange('marketingGoal', e.target.value)}>
             {['行業專業權威性', '有趣的專業領域知識', '活潑的介紹我的專業', '生活化的介紹專業知識', '產生同業合作機會'].map(o => <option key={o} value={o}>{o}</option>)}
           </select>
         </div>
-        <div className="space-y-3 text-left">
+
+        {/* 順序 5: 核心重點 */}
+        <div className="space-y-3 text-left col-span-full lg:col-span-1">
           <label className={labelClasses}>核心重點</label>
           <select value={formData.strategyFocus} onChange={(e) => handleChange('strategyFocus', e.target.value)}>
             {['更多我主要客戶的銷售', '更多陌生客戶的開發', '我與粉絲的互動', '讓有興趣的人來詢問'].map(o => <option key={o} value={o}>{o}</option>)}
           </select>
         </div>
-        <div className="space-y-3 text-left">
-          <label className={labelClasses}>品牌名稱</label>
-          <input type="text" placeholder="選填品牌名..." value={formData.brandName} onChange={(e) => handleChange('brandName', e.target.value)} />
+
+        {/* 順序 6: 創意風格 (隱藏描述) */}
+        <div className="space-y-3 text-left col-span-full lg:col-span-1">
+          <label className={labelClasses}>創意風格</label>
+          <select value={formData.style} onChange={(e) => handleChange('style', e.target.value)}>
+            {styles.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
+          </select>
         </div>
       </div>
 
@@ -109,11 +121,11 @@ const MarketingForm: React.FC<Props> = ({ formData, setFormData, onSubmit, loadi
 
       <div className="pt-16 border-t-2 border-[#F2E7D5]/40 text-left">
         <label className={labelClasses}>聯絡資訊與 Call-to-Action (CTA)</label>
-        <textarea className="w-full h-48 !rounded-[40px] shadow-inner" placeholder="請提供您的聯絡方式，將自動生成於貼文末端..." value={formData.contactInfo} onChange={(e) => handleChange('contactInfo', e.target.value)} />
+        <textarea className="w-full h-48 !rounded-[24px] !p-[3px] !px-4" placeholder="請提供您的聯絡方式，將自動生成於貼文末端..." value={formData.contactInfo} onChange={(e) => handleChange('contactInfo', e.target.value)} />
       </div>
 
       <button type="submit" disabled={loading} className="w-full btn-primary-coffee py-9 font-black text-sm tracking-[0.4em] uppercase flex items-center justify-center space-x-5 shadow-3xl shadow-[#D69A73]/30 disabled:opacity-50">
-        {loading ? <><Loader2 className="animate-spin" size={24} /><span>策略調配中，請稍候...</span></> : <><Wand2 size={24} /><span>生成我的行銷計畫</span></>}
+        {loading ? <><Loader2 className="animate-spin" size={24} /><span>策略調配中，請稍候...</span></> : <><Wand2 size={24} /><span>產生我的貼文計畫</span></>}
       </button>
     </form>
   );
